@@ -1,5 +1,5 @@
 import express from "express";
-import { userData, userRegister,InsertData,getSensor,getallSensor,getNano,getNanoGraph,getLast,uploadImage,getImage,uploadImage2,getImage2} from "../controllers/sensor.js";
+import { userData, userRegister,InsertData,getSensor,getallSensor,getNano,getNanoGraph,getLast,getImage,getImage2,upload, upload2,} from "../controllers/sensor.js";
 
 const router = express.Router();
 
@@ -22,9 +22,9 @@ router.get('/getNanoGraph', getNanoGraph);
 router.get('/getLast',getLast);
 
 //image
-router.post('/upload', uploadImage);
+router.post('/upload', upload);
 //image2
-router.post('/upload2', uploadImage2);
+router.post('/upload2',upload2);
 //image-get
 router.get('/getImage', getImage);
 //image-get2

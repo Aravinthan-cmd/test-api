@@ -1,7 +1,7 @@
 import Data from "../model/sensorModel.js";
 import User from "../model/userModel.js";
-import imageModel from "../model/imageModel.js";
-import imageModel2 from "../model/imageModel2.js";
+import Image from "../model/imageModel.js"
+import image2 from "../model/imageModel2.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import axios from "axios";
@@ -92,7 +92,6 @@ export const getallSensor = async (req, res) => {
 export const getLast = async (req, res) => {
   let { select } = req.query;
   try {
-    // Use the appropriate model name if "Data" is not the correct model name
     const getLast5SensorData = await Data.find(
       {},
       { vibration: 1, updatedAt: 1, _id: 0 }
@@ -152,11 +151,17 @@ export const getNanoGraph = async (req, res) => {
   let token = await getAuthToken(credentials);
   let { graphName, startDate, endDate } = req.query;
   const currentDate = Math.floor(Date.now() / 1000);
+const thirtyDaysInSeconds = 30 * 86400;
+const thirtyDaysAgo = currentDate - thirtyDaysInSeconds;
+
+console.log("Current Date (Epoch):", currentDate);
+console.log("30 Days Ago (Epoch):", thirtyDaysAgo);
+
   if (graphName === undefined) {
     graphName = "temperature";
   }
   if (startDate === undefined) {
-    startDate = 1706440070;
+    startDate = thirtyDaysAgo;
   }
   if (endDate === undefined) {
     endDate = currentDate;
@@ -185,74 +190,74 @@ export const getNanoGraph = async (req, res) => {
   }
 };
 
-//Image
-const Storage = multer.diskStorage({
-  destination: "/Users/naveenkumar/Desktop/test/nano-image/src/upload",
-  filename: (req, file, cb) => {
-    cb(null, file.originalname);
-  },
-});
-const upload = multer({
-  storage: Storage,
-}).single("image");
+// //Image
+// const Storage = multer.diskStorage({
+//   destination: "/Users/naveenkumar/Desktop/test/nano-image/src/upload",
+//   filename: (req, file, cb) => {
+//     cb(null, file.originalname);
+//   },
+// });
+// const upload = multer({
+//   storage: Storage,
+// }).single("image");
 
-export const uploadImage = async (req, res) => {
-  upload(req, res, (err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      const newImage = imageModel({
-        name: req.body.name,
-        temperature: req.body.temperature,
-        image: {
-          data: req.file.originalname,
-          contentType: "image/png",
-        },
-      });
-      newImage
-        .save()
-        .then(() => res.send("successfully uploaded.."))
-        .catch((err) => console.log(err));
-    }
-  });
-};
+// export const uploadImage = async (req, res) => {
+//   upload(req, res, (err) => {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       const newImage = imageModel({
+//         name: req.body.name,
+//         temperature: req.body.temperature,
+//         image: {
+//           data: req.file.originalname,
+//           contentType: "image/png",
+//         },
+//       });
+//       newImage
+//         .save()
+//         .then(() => res.send("successfully uploaded.."))
+//         .catch((err) => console.log(err));
+//     }
+//   });
+// };
 
-//Image2
-const Storage2 = multer.diskStorage({
-  destination: "/Users/naveenkumar/Desktop/test/nano-image/src/upload2",
-  filename: (req, file, cb) => {
-    cb(null, file.originalname);
-  },
-});
-const upload2 = multer({
-  storage: Storage2,
-}).single("image2");
+// //Image2
+// const Storage2 = multer.diskStorage({
+//   destination: "/Users/naveenkumar/Desktop/test/nano-image/src/upload2",
+//   filename: (req, file, cb) => {
+//     cb(null, file.originalname);
+//   },
+// });
+// const upload2 = multer({
+//   storage: Storage2,
+// }).single("image");
 
-export const uploadImage2 = async (req, res) => {
-  upload2(req, res, (err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      const newImage = imageModel2({
-        name: req.body.name,
-        alert: req.body.alert,
-        image: {
-          data: req.file.originalname,
-          contentType: "image/png",
-        },
-      });
-      newImage
-        .save()
-        .then(() => res.send("successfully uploaded.."))
-        .catch((err) => console.log(err));
-    }
-  });
-};
+// export const uploadImage2 = async (req, res) => {
+//   upload2(req, res, (err) => {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       const newImage2 = imageModel2({
+//         name: req.body.name,
+//         alert: req.body.alert,
+//         image: {
+//           data: req.file.originalname,
+//           contentType: "image/png",
+//         },
+//       });
+//       newImage2
+//         .save()
+//         .then(() => res.send("successfully uploaded.."))
+//         .catch((err) => console.log(err));
+//     }
+//   });
+// };
 
 //getImage
 export const getImage = async (req, res) => {
   try {
-    const getimage = await imageModel.find().sort({ updatedAt: -1 }).limit(1);
+    const getimage = await Image.find().sort({ updatedAt: -1 }).limit(1);
     res.status(200).json(getimage);
   } catch (error) {
     res.status(500).json(error);
@@ -262,9 +267,43 @@ export const getImage = async (req, res) => {
 //getImage2
 export const getImage2 = async (req, res) => {
   try {
-    const getimage = await imageModel2.find().sort({ updatedAt: -1 }).limit(1);
+    const getimage = await image2.find().sort({ updatedAt: -1 }).limit(1);
     res.status(200).json(getimage);
   } catch (error) {
     res.status(500).json(error);
+  }
+};
+
+//image
+export const upload = async (req, res) => {
+  console.log(req.body.image);
+  try {
+    const newImageData = {
+      name: req.body.name,
+      temperature: req.body.temperature,
+      image: req.body.image,
+    };
+    await Image.create(newImageData);
+    res.status(200).json({ message: "Data inserted successfully" });
+  } catch (err) {
+    console.error('Error uploading image:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+//image2
+export const upload2 = async (req, res) => {
+  console.log(req.body.image);
+  try {
+    const newImageData2 = {
+      name: req.body.name,
+      alert: req.body.alert,
+      image: req.body.image,
+    };
+    await image2.create(newImageData2);
+    res.status(200).json({ message: "Data inserted successfully" });
+  } catch (err) {
+    console.error('Error uploading image:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };

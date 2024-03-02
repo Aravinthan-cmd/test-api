@@ -2,7 +2,8 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import sensorRoute from "./api/routes/sensor.js";
-// import bcrypt from 'bcryptjs';
+import bodyParser from "body-parser";
+
 const app = express();
 
 const connect = async () =>{
@@ -22,6 +23,7 @@ mongoose.connection.on('disconnected',()=>{
 
 //middlewares
 //for json
+app.use(bodyParser.json({limit: '10mb'}));
 app.use(express.json());
 
 app.use(cors({
